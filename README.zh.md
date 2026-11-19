@@ -1,5 +1,7 @@
 # dsh-bailian-model-catalog
 
+[English](./README.md) | **简体中文**
+
 给 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的**阿里百炼 Token Plan** 路由补齐模型目录：官方标注支持视觉理解的模型会声明 `[text, image]`，附图不再被「当前模型不支持图片」拦下。
 
 ## 问题出在哪

@@ -1,5 +1,7 @@
 # dsh-bailian-model-catalog
 
+**English** | [简体中文](./README.zh.md)
+
 Completes the model catalog for **Alibaba Cloud Bailian (Model Studio) Token Plan** routes in [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness), so the models that officially accept images actually declare `[text, image]` — and an attached image stops being rejected with "the current model does not support images".
 
 ## Why it is needed
