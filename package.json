@@ -1,0 +1,57 @@
+{
+  "name": "dsh-bailian-model-catalog",
+  "version": "0.1.0",
+  "description": "DeepSeek Harness plugin: completes the pi-ai model catalog and input modalities for Alibaba Cloud Bailian (Model Studio) Token Plan routes, so vision models declare text+image. 为阿里百炼 Token Plan 路由补齐模型目录与输入模态。",
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "icon": "./icon.svg",
+  "files": [
+    "index.js",
+    "resolve.js",
+    "cordis.patch.yml",
+    "icon.svg",
+    "README.md",
+    "README.zh.md"
+  ],
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "dsh-bundle",
+    "bailian",
+    "aliyun",
+    "dashscope",
+    "qwen",
+    "deepseek",
+    "vision",
+    "multimodal",
+    "model-catalog",
+    "token-plan"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.1.0"
+  },
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check index.js && node --check resolve.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dsh": {
+    "manifestVersion": 1,
+    "bundle": {
+      "patch": "./cordis.patch.yml",
+      "listedByDefault": true
+    }
+  }
+}
