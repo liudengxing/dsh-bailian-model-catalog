@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.4
+
+首个正式对外版本。
+
+- 新增「实现说明 / Implementation notes」小节：解释读取期覆盖、宿主模块实例解析、
+  只覆盖自补 id 三处设计取舍
+- 安装示例的本地开发路径改为中性的 `/absolute/path/to/...` 占位符
+- 移除说明中的本机路径引用
+
 ## 0.1.3
 
 - 新增 `.github/workflows/publish.yml`：推 `v*` tag 后自动跑测试并以
