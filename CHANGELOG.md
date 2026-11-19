@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- 新增 `.github/workflows/publish.yml`：推 `v*` tag 后自动跑测试并以
+  `npm publish --provenance` 发布（Trusted Publishing + OIDC，无需长期 token）
+- README 增加「自动发布」小节
+
 ## 0.1.2
 
 - 仓库迁移至 GitHub：`github.com/liudengxing/dsh-bailian-model-catalog`

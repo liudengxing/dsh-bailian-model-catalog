@@ -45,6 +45,24 @@ dsh plugin --profile <profile> add github:liudengxing/dsh-bailian-model-catalog
 dsh plugin --profile <profile> add "link:Z:/path/to/dsh-bailian-model-catalog"
 ```
 
+## 自动发布
+
+仓库带 `.github/workflows/publish.yml`：推 `v*` tag 即跑 `npm run check` + `npm test`，
+校验 tag 与 `package.json` 版本一致后 `npm publish --provenance`。
+
+发版流程：
+
+```bash
+# 1. 改 package.json 的 version 与 CHANGELOG.md
+# 2. 提交
+git commit -am "chore(release): v0.1.3"
+git tag v0.1.3
+git push origin main --tags
+```
+
+npm 侧需要在包页面 Settings → Trusted Publishing 绑定本仓库与本工作流，
+绑好后由 OIDC 签发短期凭据，仓库里不需要保存任何长期 token。
+
 ## 配置
 
 ### 情况 A：路由名就叫 `qwen-token-plan-cn`

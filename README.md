@@ -40,6 +40,27 @@ For local development install with `link:` so edits apply immediately:
 dsh plugin --profile <profile> add "link:Z:/path/to/dsh-bailian-model-catalog"
 ```
 
+## Automated publishing
+
+The repo ships `.github/workflows/publish.yml`: pushing a `v*` tag runs
+`npm run check` + `npm test`, verifies the tag matches the `package.json`
+version, then runs `npm publish --provenance`.
+
+Release flow:
+
+```bash
+# 1. bump version in package.json and update CHANGELOG.md
+# 2. commit
+git commit -am "chore(release): v0.1.3"
+git tag v0.1.3
+git push origin main --tags
+```
+
+On the npm side, bind this repository and workflow under
+Settings → Trusted Publishing on the package page. OIDC then issues a
+short-lived credential at publish time, so no long-lived token is stored in
+the repository.
+
 ## Configure
 
 ### Route already named `qwen-token-plan-cn`
