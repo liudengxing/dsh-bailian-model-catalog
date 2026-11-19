@@ -42,7 +42,7 @@ dsh plugin --profile <profile> add github:liudengxing/dsh-bailian-model-catalog
 本地开发时用 `link:` 前缀，改代码即生效：
 
 ```bash
-dsh plugin --profile <profile> add "link:Z:/path/to/dsh-bailian-model-catalog"
+dsh plugin --profile <profile> add "link:/absolute/path/to/dsh-bailian-model-catalog"
 ```
 
 ## 自动发布
@@ -132,6 +132,14 @@ pi-ai 目录 `compat` 带进请求体的 `enable_thinking` 参数，兼容模式
 
 - 本插件只做两件事：给 pi-ai 目录写条目、在读取期叠加元数据。它不注册 provider 路由，也不接管适配器。
 - 若同时安装了另一个 `@deepseek-ai/dsh-llm-pi-ai` 实例（例如自建独立路由的插件），会先撞上 DSH 的全局限制：`LlmError: configurable provider "amazon-bedrock" is already declared`，第二个实例整实例激活失败。这与本插件无关，请改用路由借名方式扩展。
+
+## 实现说明
+
+本插件有三处不显而易见的设计取舍，都在上面的「限制」里给出了结果，但原因值得单独说清：
+
+- **读取期覆盖，而不是提前写目录。** patch 只能把条目追加到插件树尾部，于是本插件的 `apply()` 一定在 `llm-pi-ai` 之后执行，而后者早已把路由物化成快照。所以本插件不改「数据」，改「读取路径」：包一层 `ModelsImpl.getModels`，在每次读取时按路由名叠加元数据。
+- **必须拿到宿主自己的 pi-ai 模块实例。** profile 插件的 `import` 不会回退到 DSH 安装目录，裸导入会失败；即便成功，从不同 URL 加载的同一个包也是两个模块实例，写进去的数据宿主看不见。`resolve.js` 先试裸导入，失败后按安装锚点解析出真实文件路径，用绝对 URL 导入，确保两边是同一份对象。
+- **只覆盖自己补进来的 id。** 目录里原本就有的模型一个字节都不改；跨厂商的模型也不继承别人的 `maxTokens`/`compat`，否则会给错误的端点发错误的参数。
 
 ## License
 

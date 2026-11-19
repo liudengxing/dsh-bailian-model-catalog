@@ -37,7 +37,7 @@ dsh plugin --profile <profile> add github:liudengxing/dsh-bailian-model-catalog
 For local development install with `link:` so edits apply immediately:
 
 ```bash
-dsh plugin --profile <profile> add "link:Z:/path/to/dsh-bailian-model-catalog"
+dsh plugin --profile <profile> add "link:/absolute/path/to/dsh-bailian-model-catalog"
 ```
 
 ## Automated publishing
@@ -118,10 +118,13 @@ describes the image correctly. The `enable_thinking` parameter that the
 `compat` inherited from the pi-ai catalog adds to the request body is accepted
 by the compatible-mode gateway, so it is not a blocker.
 
-## Coexistence
+## Implementation notes
 
-- This plugin only writes catalog entries and overlays metadata at read time. It registers no provider route and takes over no adapter.
-- Installing a second `@deepseek-ai/dsh-llm-pi-ai` instance (for example from another plugin that wants its own route) hits a DSH-wide limit first: `LlmError: configurable provider "amazon-bedrock" is already declared`, and the second instance fails to activate. That is unrelated to this plugin; extend through route borrowing instead.
+Three design decisions in this plugin are not obvious. Their outcomes are listed under Limits above; the reasoning is here.
+
+- **Read-time overlay instead of pre-seeding the catalog.** A patch can only append to the end of the plugin tree, so this plugin's `apply()` always runs after `llm-pi-ai` — which has already materialized its route models into a snapshot. So the plugin does not change the data; it changes the read path: it wraps `ModelsImpl.getModels` and overlays metadata by route name on every read.
+- **It must resolve the host's own pi-ai module instance.** A profile plugin's `import` does not fall back to the DSH installation, so a bare import fails; and even when it succeeds, the same package loaded from a different URL is a *different* module instance and the host never sees the data. `resolve.js` tries the bare import first, then resolves the real file through the installation anchors and imports it by absolute URL, so both sides share one object.
+- **It only overlays ids it added itself.** Models already shipped in the catalog are never touched, and models from another vendor do not inherit someone else's `maxTokens`/`compat` — that would send wrong parameters to the wrong endpoint.
 
 ## License
 
