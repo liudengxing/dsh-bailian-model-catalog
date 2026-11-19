@@ -36,7 +36,7 @@ dsh plugin --profile <你的 profile> add dsh-bailian-model-catalog
 从 GitHub（插件市场收录前也能直接装）：
 
 ```bash
-dsh plugin --profile <profile> add github:echosong21/dsh-bailian-model-catalog
+dsh plugin --profile <profile> add github:liudengxing/dsh-bailian-model-catalog
 ```
 
 本地开发时用 `link:` 前缀，改代码即生效：

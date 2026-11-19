@@ -53,5 +53,14 @@
       "patch": "./cordis.patch.yml",
       "listedByDefault": true
     }
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liudengxing/dsh-bailian-model-catalog.git"
+  },
+  "homepage": "https://github.com/liudengxing/dsh-bailian-model-catalog",
+  "bugs": {
+    "url": "https://github.com/liudengxing/dsh-bailian-model-catalog/issues"
+  },
+  "author": "liudengxing"
 }

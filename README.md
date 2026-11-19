@@ -31,7 +31,7 @@ dsh plugin --profile <profile> add dsh-bailian-model-catalog
 From GitHub:
 
 ```bash
-dsh plugin --profile <profile> add github:echosong21/dsh-bailian-model-catalog
+dsh plugin --profile <profile> add github:liudengxing/dsh-bailian-model-catalog
 ```
 
 For local development install with `link:` so edits apply immediately:
