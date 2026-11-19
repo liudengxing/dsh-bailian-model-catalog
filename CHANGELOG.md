@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.3
 
 - 新增 `.github/workflows/publish.yml`：推 `v*` tag 后自动跑测试并以
   `npm publish --provenance` 发布（Trusted Publishing + OIDC，无需长期 token）
