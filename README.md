@@ -86,13 +86,14 @@ Source: <https://help.aliyun.com/zh/model-studio/token-plan-personal-overview>
 - Models outside the `deepseek-v4.1-flash` family only get their input modality; cloning another vendor's `maxTokens`/`compat` would send wrong request parameters. Their context and output limits stay at the route defaults.
 - Models already present in the shipped catalog are never touched.
 
-## Known issue: reasoning parameters on the Bailian endpoint
+## Verified on the real endpoint
 
-Before you send an image to `deepseek-v4.1-flash-1017` through Bailian, be aware of a problem **this repository does not fix** (noted 2026-11):
-
-- `dsh-llm-pi-ai` applies pi-ai's catalog `compat` for `deepseek` (which carries `enable_thinking` and other reasoning switches) to this route as well.
-- When your Bailian route points at a compatible-mode endpoint (`.../compatible-mode/v1`), the gateway may reject the request as `InvalidParameter` on `enable_thinking`. DSH's shipped `qwen-token-plan-cn` route uses the same compatible mode and the same `compat`, so this is upstream behaviour rather than something this plugin introduces.
-- No reproduction log is attached here; trust the actual error you see. Workaround directions: override `compat` at route or model level, or test against a parameter set from the official OpenAI-compatible SDK.
+Confirmed 2026-11 with a real `ALIYUN_API_KEY` against
+`https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1`:
+attaching an image to `deepseek-v4.1-flash-1017` goes through and the model
+describes the image correctly. The `enable_thinking` parameter that the
+`compat` inherited from the pi-ai catalog adds to the request body is accepted
+by the compatible-mode gateway, so it is not a blocker.
 
 ## Coexistence
 

@@ -100,13 +100,13 @@ dsh plugin --profile <profile> add "link:Z:/path/to/dsh-bailian-model-catalog"
 - 目录里本来就有的模型（例如 `deepseek-v4.1-flash`）完全不动。
 - 能力以官方文档为准；`qwen4-max-preview` 官方标注 2026-11-25 下线。
 
-## 已知问题：百炼端点上的思维链参数
+## 真机验证
 
-附带图片请求百炼 `deepseek-v4.1-flash-1017` 前，请注意以下**未在本仓库修复**的问题（2026-11 记录）：
-
-- `dsh-llm-pi-ai` 会把 pi-ai 目录里的 `deepseek` 请求兼容配置（`compat`：`enable_thinking`、`maxTokens` 等 reasoning 参数）一起套到这条路由上。
-- 若你的百炼路由 `baseURL` 指向兼容模式端点（`.../compatible-mode/v1`），网关可能以 `enable_thinking` 为不支持参数为由报 `InvalidParameter`。DSH 内置目录里同样走兼容模式的 `qwen-token-plan-cn` 路由也带这套 `compat`，属上游现状，不是本插件引入的。
-- 本文档未附实测复现记录，遇到时请以实际报错为准，并考虑在路由或模型条目级覆盖 `compat`、或改用官方 OpenAI 兼容 SDK 参数集测试。
+2026-11 用真实 `ALIYUN_API_KEY` 对
+`https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1` 验证：
+`deepseek-v4.1-flash-1017` 附图请求顺利通过，模型能正确描述图片内容。
+pi-ai 目录 `compat` 带进请求体的 `enable_thinking` 参数，兼容模式网关可以接受，
+不构成阻塞。
 
 ## 与其他插件并存
 
