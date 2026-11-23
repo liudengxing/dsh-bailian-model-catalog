@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.7
+
+- 新增 `locale/zh.json` 与 `locale/en.json`，各自声明 `meta.detail`：中文界面读
+  `README.zh.md`，英文界面读 `README.en.md`。此前详情页只按 `README_NAMES`
+  取 `README.md`，切语言不会换文档
+- `package.json` 的 `files` 加入 `locale`
+
 ## 0.1.6
 
 - 插件详情页改为**中文为默认**：`README.md` 现在是简体中文版，英文版移到
