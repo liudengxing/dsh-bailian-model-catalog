@@ -1,8 +1,10 @@
 # dsh-bailian-model-catalog
 
-[English](./README.md) | **简体中文**
+**简体中文** | [English](./README.en.md)
 
-给 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的**阿里百炼 Token Plan** 路由补齐模型目录：官方标注支持视觉理解的模型会声明 `[text, image]`，附图不再被「当前模型不支持图片」拦下。
+为阿里百炼 Token Plan 路由补齐模型目录与输入模态，支持图片输入与多模态能力。装好后，官方标注支持视觉理解的模型会声明 `[text, image]`，附图不再被「当前模型不支持图片」拦下。
+
+给 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的**阿里百炼 Token Plan** 路由（`https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1`）补齐 pi-ai 模型目录：DSH 目录里缺的模型补进去，已有模型漏掉的输入模态补上，让多模态模型真的能收图。
 
 ## 问题出在哪
 
@@ -60,7 +62,7 @@ git tag v0.1.3
 git push origin main --tags
 ```
 
-npm 侧需要在包页面 Settings → Trusted Publishing 绑定本仓库与本工作流，
+npm 侧需要在包页面 Settings → Trusted Publisher 绑定本仓库与本工作流，
 绑好后由 OIDC 签发短期凭据，仓库里不需要保存任何长期 token。
 
 ## 配置
@@ -102,7 +104,7 @@ npm 侧需要在包页面 Settings → Trusted Publishing 绑定本仓库与本�
 
 ## 覆盖的模型
 
-视觉理解（`text, image`）：`qwen4-max`、`qwen4-max-preview`、`qwen3.8-max`、`qwen3.8-flash`、`qwen3.7-plus`、`qwen3.6-flash`、`deepseek-v4.1-flash`、`deepseek-v4.1-flash-1017`
+视觉理解（`text, image`，即支持图片输入的多模态模型）：`qwen4-max`、`qwen4-max-preview`、`qwen3.8-max`、`qwen3.8-flash`、`qwen3.7-plus`、`qwen3.6-flash`、`deepseek-v4.1-flash`、`deepseek-v4.1-flash-1017`
 
 纯文本：`qwen3.7-max`、`glm-5.3`、`glm-5.2`、`deepseek-v4-pro`、`deepseek-v4-pro-0813`、`deepseek-v4-flash-0731`、`auto`、`decision-model-preview`
 
@@ -141,6 +143,12 @@ pi-ai 目录 `compat` 带进请求体的 `enable_thinking` 参数，兼容模式
 - **必须拿到宿主自己的 pi-ai 模块实例。** profile 插件的 `import` 不会回退到 DSH 安装目录，裸导入会失败；即便成功，从不同 URL 加载的同一个包也是两个模块实例，写进去的数据宿主看不见。`resolve.js` 先试裸导入，失败后按安装锚点解析出真实文件路径，用绝对 URL 导入，确保两边是同一份对象。
 - **只覆盖自己补进来的 id。** 目录里原本就有的模型一个字节都不改；跨厂商的模型也不继承别人的 `maxTokens`/`compat`，否则会给错误的端点发错误的参数。
 
+## 详情页语言
+
+插件详情页按 DSH 界面语言选文档（`languageChain`：`zh-CN` → `zh` → `en`），
+所以 `README.md` 是简体中文版、`README.en.md` 是英文版，
+中文界面看中文、切到英文界面看英文。
+
 ## License
 
-MIT
+[MIT](./LICENSE)

@@ -1,75 +1,79 @@
 # dsh-bailian-model-catalog
 
-**English** | [简体中文](./README.zh.md)
+**简体中文** | [English](./README.en.md)
 
-Completes the model catalog for **Alibaba Cloud Bailian (Model Studio) Token Plan** routes in [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness), so the models that officially accept images actually declare `[text, image]` — and an attached image stops being rejected with "the current model does not support images".
+为阿里百炼 Token Plan 路由补齐模型目录与输入模态，支持图片输入与多模态能力。装好后，官方标注支持视觉理解的模型会声明 `[text, image]`，附图不再被「当前模型不支持图片」拦下。
 
-## Why it is needed
+给 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的**阿里百炼 Token Plan** 路由（`https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1`）补齐 pi-ai 模型目录：DSH 目录里缺的模型补进去，已有模型漏掉的输入模态补上，让多模态模型真的能收图。
 
-DSH decides whether a model accepts images purely from its declared input modalities. When `@deepseek-ai/dsh-llm-pi-ai` materializes a route it runs:
+## 问题出在哪
+
+DSH 判断模型能不能收图，只看模型声明的输入模态。`@deepseek-ai/dsh-llm-pi-ai` 在物化一条路由时执行：
 
 ```ts
 input: declaredInput(entry.input) ?? base?.input ?? [...request.defaultInput]
 ```
 
-`base` is looked up in the installed pi-ai catalog **by route name**. A hand-written Bailian route is usually named `aliyun` (no such catalog) and its model entries only carry `id`, so the modality falls back to `defaultInput`, whose default is `['text']`.
+其中 `base` 是按**路由名**去 pi-ai 已安装目录里查的条目。手写百炼路由时：
 
-## What the plugin does
+- 路由名通常叫 `aliyun` 之类，目录里没有这个名字 → `base` 为空；
+- 模型条目只写了 `id`，没写 `input` → 落到 `defaultInput`，而它的默认值是 `['text']`。
 
-1. Fills the shipped `qwen-token-plan-cn` catalog object with the models DSH is missing (and adds `image` to entries that lack it).
-2. Bridges the ordering gap: the adapter materializes its model snapshot during its own `apply()`, so catalog writes that arrive later are invisible. The plugin overlays `input`/`contextWindow`/`maxTokens`/`compat`/`reasoning` at read time (`ModelsImpl.getModels`) and restores the original on dispose.
-3. Lets your own route name borrow that catalog.
+结果就是：哪怕模型在百炼侧明确支持视觉，DSH 也会按纯文本处理，附图被宿主拒绝，提示「当前模型不支持图片，请切换支持图片的模型」。
 
-## Install
+## 这个插件做什么
 
-From npm:
+1. **补齐 pi-ai 目录**：把官方能力表里 DSH 目录缺的模型写进 `qwen-token-plan-cn` 的 shipped catalog 对象（缺的加、漏模态的补）。
+2. **补上时序差**：适配器在自己的 `apply()` 阶段就把路由物化成了模型快照，晚到的目录写入看不到。插件因此在**读取期**（`ModelsImpl.getModels`）把目录里的 `input`/`contextWindow`/`maxTokens`/`compat`/`reasoning` 覆盖到条目上，卸载时还原。
+3. **允许借名**：你自己的路由名（如 `aliyun`）可以通过配置借用这份目录。
+
+## 安装
+
+从 npm：
 
 ```bash
-dsh plugin --profile <profile> add dsh-bailian-model-catalog
+dsh plugin --profile <你的 profile> add dsh-bailian-model-catalog
 ```
 
-From GitHub:
+从 GitHub（插件市场收录前也能直接装）：
 
 ```bash
 dsh plugin --profile <profile> add github:liudengxing/dsh-bailian-model-catalog
 ```
 
-For local development install with `link:` so edits apply immediately:
+本地开发时用 `link:` 前缀，改代码即生效：
 
 ```bash
 dsh plugin --profile <profile> add "link:/absolute/path/to/dsh-bailian-model-catalog"
 ```
 
-## Automated publishing
+## 自动发布
 
-The repo ships `.github/workflows/publish.yml`: pushing a `v*` tag runs
-`npm run check` + `npm test`, verifies the tag matches the `package.json`
-version, then runs `npm publish --provenance`.
+仓库带 `.github/workflows/publish.yml`：推 `v*` tag 即跑 `npm run check` + `npm test`，
+校验 tag 与 `package.json` 版本一致后 `npm publish --provenance`。
 
-Release flow:
+发版流程：
 
 ```bash
-# 1. bump version in package.json and update CHANGELOG.md
-# 2. commit
+# 1. 改 package.json 的 version 与 CHANGELOG.md
+# 2. 提交
 git commit -am "chore(release): v0.1.3"
 git tag v0.1.3
 git push origin main --tags
 ```
 
-On the npm side, bind this repository and workflow under
-Settings → Trusted Publishing on the package page. OIDC then issues a
-short-lived credential at publish time, so no long-lived token is stored in
-the repository.
+npm 侧需要在包页面 Settings → Trusted Publisher 绑定本仓库与本工作流，
+绑好后由 OIDC 签发短期凭据，仓库里不需要保存任何长期 token。
 
-## Configure
+## 配置
 
-### Route already named `qwen-token-plan-cn`
+### 情况 A：路由名就叫 `qwen-token-plan-cn`
 
-Nothing to configure.
+零配置，装上即可。
 
-### Custom route name (e.g. `aliyun`)
+### 情况 B：路由名是你自己起的（例如 `aliyun`）
 
-Set `api` on the route (the catalog does not know your name, so the protocol cannot be inferred) and map the route to the catalog:
+一要在**路由级**写明 `api`（目录里没有这个名字，适配器推断不出协议，否则会报 `needs an api`）；二要让插件把目录借给这个路由：
 
 ```yaml
 - id: llm-pi-ai
@@ -77,12 +81,13 @@ Set `api` on the route (the catalog does not know your name, so the protocol can
   config:
     providers:
       aliyun:
-        displayName: Bailian · Token Plan
+        displayName: 阿里百炼 · Token Plan
         apiKeyEnv: ALIYUN_API_KEY
         api: openai-completions
         baseURL: https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1
         models:
           - id: deepseek-v4.1-flash-1017
+          - id: qwen4-max
 
 - id: bailian-catalog
   config:
@@ -90,42 +95,60 @@ Set `api` on the route (the catalog does not know your name, so the protocol can
       aliyun: qwen-token-plan-cn
 ```
 
-| Field | Default | Meaning |
+### 全量配置项
+
+| 字段 | 默认值 | 说明 |
 | --- | --- | --- |
-| `routes` | `{ qwen-token-plan-cn: qwen-token-plan-cn }` | route name → shipped catalog to borrow |
-| `exclude` | `[]` | model ids the plugin must leave alone |
+| `routes` | `{ qwen-token-plan-cn: qwen-token-plan-cn }` | 路由名 → 借用哪份 shipped catalog（pi-ai 里的 provider 名） |
+| `exclude` | `[]` | 不让插件插手的模型 id |
 
-## Covered models
+## 覆盖的模型
 
-Vision (`text, image`): `qwen4-max`, `qwen4-max-preview`, `qwen3.8-max`, `qwen3.8-flash`, `qwen3.7-plus`, `qwen3.6-flash`, `deepseek-v4.1-flash`, `deepseek-v4.1-flash-1017`
+视觉理解（`text, image`，即支持图片输入的多模态模型）：`qwen4-max`、`qwen4-max-preview`、`qwen3.8-max`、`qwen3.8-flash`、`qwen3.7-plus`、`qwen3.6-flash`、`deepseek-v4.1-flash`、`deepseek-v4.1-flash-1017`
 
-Text only: `qwen3.7-max`, `glm-5.3`, `glm-5.2`, `deepseek-v4-pro`, `deepseek-v4-pro-0813`, `deepseek-v4-flash-0731`, `auto`, `decision-model-preview`
+纯文本：`qwen3.7-max`、`glm-5.3`、`glm-5.2`、`deepseek-v4-pro`、`deepseek-v4-pro-0813`、`deepseek-v4-flash-0731`、`auto`、`decision-model-preview`
 
-Source: <https://help.aliyun.com/zh/model-studio/token-plan-personal-overview>
+来源：<https://help.aliyun.com/zh/model-studio/token-plan-personal-overview>
 
-## Limits
+## 生效与回滚
 
-- Relies on pi-ai internals (`ModelsImpl.getModels`). If a future release renames it, the plugin degrades to catalog-only writes.
-- Models outside the `deepseek-v4.1-flash` family only get their input modality; cloning another vendor's `maxTokens`/`compat` would send wrong request parameters. Their context and output limits stay at the route defaults.
-- Models already present in the shipped catalog are never touched.
+- 不需要重启：适配器在下一次请求时重读配置，插件也是按读取期生效。
+- 卸载插件即还原：`ctx.effect` 在销毁时把 `getModels` 还原成原实现，程序化写入目录的条目随进程结束消失。
 
-## Verified on the real endpoint
+## 限制
 
-Confirmed 2026-11 with a real `ALIYUN_API_KEY` against
-`https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1`:
-attaching an image to `deepseek-v4.1-flash-1017` goes through and the model
-describes the image correctly. The `enable_thinking` parameter that the
-`compat` inherited from the pi-ai catalog adds to the request body is accepted
-by the compatible-mode gateway, so it is not a blocker.
+- 依赖 pi-ai 的内部形状（`ModelsImpl.getModels`）。若新版本改名，插件会退化成「只写目录」，此时要等 profile 重新解析配置（例如改一次设置）才看得到效果。
+- 非 `deepseek-v4.1-flash` 家族的模型**只补输入模态**，不继承别人的 `maxTokens`/`compat`——跨厂商克隆会发错请求参数。它们的上下文与输出上限仍取路由默认值，需要精确值请在模型条目里自己写。
+- 目录里本来就有的模型（例如 `deepseek-v4.1-flash`）完全不动。
+- 能力以官方文档为准；`qwen4-max-preview` 官方标注 2026-11-25 下线。
 
-## Implementation notes
+## 真机验证
 
-Three design decisions in this plugin are not obvious. Their outcomes are listed under Limits above; the reasoning is here.
+2026-11 用真实 `ALIYUN_API_KEY` 对
+`https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1` 验证：
+`deepseek-v4.1-flash-1017` 附图请求顺利通过，模型能正确描述图片内容。
+pi-ai 目录 `compat` 带进请求体的 `enable_thinking` 参数，兼容模式网关可以接受，
+不构成阻塞。
 
-- **Read-time overlay instead of pre-seeding the catalog.** A patch can only append to the end of the plugin tree, so this plugin's `apply()` always runs after `llm-pi-ai` — which has already materialized its route models into a snapshot. So the plugin does not change the data; it changes the read path: it wraps `ModelsImpl.getModels` and overlays metadata by route name on every read.
-- **It must resolve the host's own pi-ai module instance.** A profile plugin's `import` does not fall back to the DSH installation, so a bare import fails; and even when it succeeds, the same package loaded from a different URL is a *different* module instance and the host never sees the data. `resolve.js` tries the bare import first, then resolves the real file through the installation anchors and imports it by absolute URL, so both sides share one object.
-- **It only overlays ids it added itself.** Models already shipped in the catalog are never touched, and models from another vendor do not inherit someone else's `maxTokens`/`compat` — that would send wrong parameters to the wrong endpoint.
+## 与其他插件并存
+
+- 本插件只做两件事：给 pi-ai 目录写条目、在读取期叠加元数据。它不注册 provider 路由，也不接管适配器。
+- 若同时安装了另一个 `@deepseek-ai/dsh-llm-pi-ai` 实例（例如自建独立路由的插件），会先撞上 DSH 的全局限制：`LlmError: configurable provider "amazon-bedrock" is already declared`，第二个实例整实例激活失败。这与本插件无关，请改用路由借名方式扩展。
+
+## 实现说明
+
+本插件有三处不显而易见的设计取舍，都在上面的「限制」里给出了结果，但原因值得单独说清：
+
+- **读取期覆盖，而不是提前写目录。** patch 只能把条目追加到插件树尾部，于是本插件的 `apply()` 一定在 `llm-pi-ai` 之后执行，而后者早已把路由物化成快照。所以本插件不改「数据」，改「读取路径」：包一层 `ModelsImpl.getModels`，在每次读取时按路由名叠加元数据。
+- **必须拿到宿主自己的 pi-ai 模块实例。** profile 插件的 `import` 不会回退到 DSH 安装目录，裸导入会失败；即便成功，从不同 URL 加载的同一个包也是两个模块实例，写进去的数据宿主看不见。`resolve.js` 先试裸导入，失败后按安装锚点解析出真实文件路径，用绝对 URL 导入，确保两边是同一份对象。
+- **只覆盖自己补进来的 id。** 目录里原本就有的模型一个字节都不改；跨厂商的模型也不继承别人的 `maxTokens`/`compat`，否则会给错误的端点发错误的参数。
+
+## 详情页语言
+
+插件详情页按 DSH 界面语言选文档（`languageChain`：`zh-CN` → `zh` → `en`），
+所以 `README.md` 是简体中文版、`README.en.md` 是英文版，
+中文界面看中文、切到英文界面看英文。
 
 ## License
 
-MIT
+[MIT](./LICENSE)
