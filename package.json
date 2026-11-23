@@ -1,7 +1,7 @@
 {
   "name": "dsh-bailian-model-catalog",
-  "version": "0.1.7",
-  "description": "DeepSeek Harness plugin: completes the pi-ai model catalog and input modalities for Alibaba Cloud Bailian (Model Studio) Token Plan routes, so vision models declare text+image. 为阿里百炼 Token Plan 路由补齐模型目录与输入模态。",
+  "version": "0.1.8",
+  "description": "为阿里百炼 Token Plan 路由补齐模型目录与输入模态，支持图片输入与多模态能力。Completes the pi-ai model catalog and input modalities for Alibaba Cloud Bailian (Model Studio) Token Plan routes, so vision models declare text+image.",
   "type": "module",
   "main": "./index.js",
   "exports": {

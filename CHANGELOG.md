@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.8
+
+- `package.json` 的 `description` 改为中文在前、英文在后：npm 包页与包列表
+  显示的就是这个字段，此前只有英文在前的一句
+
 ## 0.1.7
 
 - 新增 `locale/zh.json` 与 `locale/en.json`，各自声明 `meta.detail`：中文界面读
