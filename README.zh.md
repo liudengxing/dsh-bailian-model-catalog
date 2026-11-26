@@ -120,7 +120,7 @@ npm 侧需要在包页面 Settings → Trusted Publisher 绑定本仓库与本�
 - 依赖 pi-ai 的内部形状（`ModelsImpl.getModels`）。若新版本改名，插件会退化成「只写目录」，此时要等 profile 重新解析配置（例如改一次设置）才看得到效果。
 - 非 `deepseek-v4.1-flash` 家族的模型**只补输入模态**，不继承别人的 `maxTokens`/`compat`——跨厂商克隆会发错请求参数。它们的上下文与输出上限仍取路由默认值，需要精确值请在模型条目里自己写。
 - 目录里本来就有的模型（例如 `deepseek-v4.1-flash`）完全不动。
-- 能力以官方文档为准；`qwen4-max-preview` 官方标注 2026-11-25 下线。
+- 能力以官方文档为准；`qwen4-max-preview` 已于 2026-11-25 下线，但官方说明原模型 ID 仍可正常调用并自动路由至 `qwen4-max`（Credits 与用量均按 `qwen4-max` 计），因此仍按视觉模型声明——删掉它会让还在用该 ID 的人退回纯文本，附图又被拦下。
 
 ## 真机验证
 

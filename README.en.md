@@ -108,6 +108,7 @@ Source: <https://help.aliyun.com/zh/model-studio/token-plan-personal-overview>
 - Relies on pi-ai internals (`ModelsImpl.getModels`). If a future release renames it, the plugin degrades to catalog-only writes.
 - Models outside the `deepseek-v4.1-flash` family only get their input modality; cloning another vendor's `maxTokens`/`compat` would send wrong request parameters. Their context and output limits stay at the route defaults.
 - Models already present in the shipped catalog are never touched.
+- Capabilities follow the vendor documentation. `qwen4-max-preview` was retired on 2026-11-25, but the vendor states the original model id remains callable and is routed to `qwen4-max` (Credits and usage are billed as `qwen4-max`), so it is still declared as a vision model — dropping it would send anyone still using that id back to text-only, where attached images get rejected again.
 
 ## Verified on the real endpoint
 
